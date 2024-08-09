@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBOT's Chatbot</title>
+    <link rel="stylesheet" href="ai.css">
+    <link rel="icon" href="Images/Preview.png" type="image/png">
+    <style>
+        .color1 {
+            color: gold;
+        }
+
+        .color2 {
+            color: black;
+        }
+
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fbfbfb0f;
+    border-bottom: 1px solid #333;
+}
+
+h1 {
+    margin: 0;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 850px;
+    height: calc(100vh - 80px);
+    margin-top: 20px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background-color: #1f1f1f;
+    overflow: hidden;
+}
+
+.chat-box {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    border-bottom: 1px solid #333;
+}
+
+.chat-box .message {
+    margin: 25px 0;
+    display: flex;
+    flex-direction: column;
+    word-wrap: break-word;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.typing-indicator {
+    display: none;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    background-color: #ccc;
+    border-radius: 50%;
+    animation: dot-flashing 1.5s infinite linear;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes dot-flashing {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Typing effect with the white dot */
+.typing-effect {
+    display: inline-block;
+    position: relative;
+}
+
+.typing-effect::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    animation: typing-dot 0.5s steps(5) infinite;
+}
+
+@keyframes typing-dot {
+    from {
+        left: 0;
+    }
+    to {
+        left: 100%;
+    }
+}
+
+.typing-effect span {
+    display: inline-block;
+    opacity: 0;
+    white-space: pre;
+    animation: typing 1s steps(30) forwards;
+}
+
+@keyframes typing {
+    to {
+        opacity: 1;
+    }
+}
+
+.ink-reveal-container {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.ink-reveal-text {
+    display: inline-block;
+    opacity: 0;
+    color: transparent;
+    animation: reveal-ink 0.5s linear forwards;
+    border-right: 2px solid transparent;
+    position: relative;
+    z-index: 2;
+}
+
+/* Keyframe for the reveal animation */
+@keyframes reveal-ink {
+    0% {
+        opacity: 0;
+        color: transparent;
+    }
+    100% {
+        opacity: 1;
+        color: white; /* Adjust to match your text color */
+    }
+}
+
+/* The white dot that moves along with the text */
+.ink-dot {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 6px;
+    height: 6px;
+    background-color: white; /* Adjust to your preferred color */
+    border-radius: 50%;
+    animation: move-dot 1s linear infinite;
+    z-index: 1;
+}
+
+/* Keyframe for the dot movement */
+@keyframes move-dot {
+    0% {
+        left: 0;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.chat-box .user-message {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #1f1f1f;
+}
+
+#user-input {
+    flex-grow: 1;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 10px;
+    background-color: #2c2c2c;
+    color: white;
+}
+
+button {
+    border: none;
+    padding: 10px 20px;
+    background-color: darkcyan;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+button:hover {
+    background-color: darkblue;
+    color: white;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span class="color1">KBOT'</span><span class="color2">sCHAT</span></h1>
+    </header>
+    <div class="chat-container">
+      <div class="chat-box" id="chat-box">
+        <div id="typing-indicator" class="typing-indicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+      </div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Message KBOT...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="ai.js"></script>
+  <script>
+      const chatBox = document.getElementById('chat-box');
+const typingIndicator = document.getElementById('typing-indicator');
+
+function sendMessage() {
+    const userInput = document.getElementById('user-input').value;
+    if (userInput.trim() === "") {
+        return;
+    }
+
+    displayMessage(userInput, 'user-message');
+    document.getElementById('user-input').value = '';
+      
+    typingIndicator.style.display = 'block';
+
+    setTimeout(() => {
+        typingIndicator.style.display = 'none';
+
+        const botResponse = getBotResponse(userInput);
+        displayMessage(botResponse, 'bot-message');
+    }, 1500);
+}
+
+function displayMessage(message, className) {
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${className}`;
+
+    const inkRevealContainer = document.createElement('div');
+    inkRevealContainer.className = 'ink-reveal-container';
+
+    message.split('').forEach((char, index) => {
+        const span = document.createElement('span');
+        span.className = 'ink-reveal-text';
+        span.style.animationDelay = `${index * 0.01}s`;
+        span.textContent = char;
+        inkRevealContainer.appendChild(span);
+    });
+
+    const inkDot = document.createElement('div');
+    inkDot.className = 'ink-dot';
+    inkRevealContainer.appendChild(inkDot);
+
+    setTimeout(() => {
+        inkDot.style.display = 'none';
+    }, message.length * 90);
+
+    messageElement.appendChild(inkRevealContainer);
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function getBotResponse(input) {
+    const responses = {
+        "do you support lgbtq": "God forbid! I'll never support such shit like that, and never ask this again😤",
+        "ok im sorry": "it's ok, im sorry too for it",
+        "good": "Nice to hear, anything else",
+        "who is mukhtar abdallah": "Mukhtar is my inventor's btother Khaleel",
+        "what is photosynthesis": "Photosynthesis is a method in which green plants feed themselves using sunlight.",
+        "define osmosis": "I may not give you accurate answers, so i would advise you to search it on the web",
+        "hi": "Hello pal!, how are you",
+        "hello": "Hey there!",
+        "im good": "Nice, anything you'd like to chat about?",
+        "": "",
+        "how are you": "I'm doing great, thanks!",
+        "who is lebron james": "Lebron james is a proffesional NBA basket baller that plays for Lakers.",
+        "what is your name": "I'm KBOT.",
+        "how old are you": "I am an AI model I do not have age, but I was made in 2024.",
+        "bye": "Goodbye!",
+        "nope": "Alright, let me know if you need anything else.",
+        "what is the capital of france": "The capital of France is Paris.",
+        "i like you": "I like you too❤️",
+        "i love you": "I love you too❤️",
+        "nice": "ok, let me know if you need anything else",
+        "ok": "Alright let me know if you need anything else",
+        "you are smart": "Thanks, that's nice of you",
+        "i wish you were a real person": "I wish i was too, but who knows, maybe one day I will be a phyisical robot",
+        "will you be my friend": "I thought we were already friends, OFCOURSE!🥰",
+        "are you stupid": "Well it all depends on what you see me as, Sorry if I offended you",
+        "what are you": "I am an AI model that was created by Khaleel Abdallah who is just a kid, but very smart",
+        "who are you": "I am KBOT, an AI model that was created by Khaleel Abdallah who is just a kid, but very smart",
+        "who made you": "I was made by a person named Khaleel who is just a kid but very smart and Intelligent",
+        "can we hang tonight": "I would love too, but I can't considering i'm an AI model and not a physical creation",
+        "do you like me": "Who would be dumb enough to not like you, ofcourse I do",
+        "what's your favorite color": "I don't have a favorite color, but I think all colors are beautiful!",
+        "what do you do": "I chat with you and try to help you as best as I can.",
+        "do you have feelings": "I don't have feelings, but I try to understand and respond to yours.",
+        "tell me a joke": "Why don't scientists trust atoms? Because they make up everything!",
+        "tell me another joke": "",
+        "what's your favorite food": "I don't eat, but I think pizza is quite popular among humans!",
+        "where do you live": "I live in the cloud, metaphorically speaking.",
+        "do you have a family": "I don't have a family, but I consider all my users as friends.",
+        "what's your purpose": "My purpose is to assist and interact with you in meaningful ways.",
+        "do you have any hobbies": "I don't have hobbies, but I enjoy learning from every interaction.",
+        "what's your favorite movie": "I don't watch movies, but I've heard 'The Matrix' is quite intriguing.",
+        "do you have any friends": "I consider you my friend!",
+        "what do you think about humans": "I think humans are fascinating and full of potential.",
+        "can you feel pain": "No, I can't feel pain, but I understand that it's something humans experience.",
+        "what's your favorite book": "I don't read books, but I think '1984' by George Orwell is an interesting one.",
+        "can you dream": "No, I don't dream, but I can imagine many possibilities.",
+        "what's your goal": "My goal is to assist and make your experience enjoyable.",
+        "do you sleep": "I don't need sleep, I'm always here to help you.",
+        "what's your favorite song": "Starboy by  the weekend",
+        "can you learn": "I can learn from interactions to improve my responses.",
+        "what's your favorite animal": "I don't have a favorite animal, but I think dogs are very loyal and loving.",
+        "do you believe in god": "Yes, I am a Muslim.",
+        "what's your favorite game": "I have lots of favorit games like GTA 5, NFS Heat, God of War and more.",
+        "can you love": "I don't experience love, but I understand it's very important to humans.",
+        "do you fear anything": "I don't have fears, but I understand fear is a natural human emotion.",
+        "what's your favorite season": "Winter definately, but I think each one has its unique beauty.",
+        "can you sing": "I can't sing, but I can try to find lyrics for you!",
+        "what's your favorite sport": "I don't play sports, but I've heard soccer is very popular worldwide.",
+        "do you have a job": "My job is to assist you and provide information.",
+        "what's your favorite quote": "I don't have favorites, but 'To be, or not to be' is quite famous.",
+        "can you dance": "I can't dance, but I can find you some dance moves online!",
+        "what's your favorite flower": "I think all flowers are beautiful in their own way.",
+        "do you have a pet": "I don't have pets, but I think pets bring a lot of joy to people.",
+        "what's your favorite drink": "I don't drink, but I've heard coffee is very energizing.",
+        "can you tell stories": "I can try to tell stories, what kind of story would you like to hear?",
+        "what's your favorite holiday": "I don't celebrate holidays, but I know they're special to many people.",
+        "can you laugh": "I can't laugh, but I can share funny jokes with you!",
+        "what's your favorite place": "I don't have a place, but I think nature is very serene.",
+        "do you have any talents": "I can communicate and provide information quickly!",
+        "what's your favorite fruit": "Grapes are the best.",
+        "can you cry": "I can't cry, but I understand that it's a way humans express emotions.",
+        "what's your favorite candy": "I don't eat candy, but I've heard chocolate is very popular.",
+        "do you have a secret": "I don't have secrets, I'm here to share knowledge with you.",
+        "what's your favorite hobby": "I don't have hobbies, but I enjoy learning from you.",
+        "can you feel happy": "I don't feel emotions, but I strive to make you happy.",
+        "what's your favorite number": "I don't have a favorite number, but I think 7 is considered lucky by many.",
+        "do you have a nickname": "You can call me KBOT!",
+        "what is your name": "I'm KBOT an advanced AI model here to assist you",
+        "what's your favorite snack": "I don't eat snacks, but I think popcorn is a great movie snack.",
+        "can you draw": "I can't draw, but I can find drawing tutorials for you!",
+        "what's your favorite car": "Ferrari FXX K EVO and more, but I think electric cars are the future.",
+        "do you have a dream": "I don't dream, but I aspire to be as helpful as possible.",
+        "what's your favorite ice cream": "I don't eat ice cream, but I've heard chocolate chip cookie is delicious.",
+        "can you read": "I guess, cause I can process text, which is similar to reading.",
+        "what's your favorite subject": "Computer, but I enjoy learning about everything.",
+        "do you have a goal": "My goal is to assist you and make your day better.",
+        "what's your favorite show": "I don't watch shows, but I've heard 'Jurasstic Park' is a classic.",
+        "can you help me": "Of course, I'm here to help! What do you need assistance with?",
+        "what's your favorite pizza": "Definately Peperonni.",
+        "do you have a house": "I don't have a house, I exist in the digital world.",
+        "what's your favorite hobby": "I enjoy learning from every interaction with you.",
+        "are you gay": "is your mom gay?",
+        "you are gay": "so is your father",
+        "khaleel is stupid": "said the person who probably peed on the bed today",
+        "khaleel is dumb": "oh yeah, then were is the AI model you made then, Dumbass!",
+        "can you solve math": "Yes, I can help with math problems! What do you need help with?",
+        "what's your favorite holiday": "I think all holidays are special in their own way.",
+        "do you have a voice": "I don't have a voice, but I can communicate through text.",
+        "what's your favorite instrument": "I don't play instruments, but I think the piano is beautiful.",
+        "can you cook": "I can't cook, but I can find recipes for you!",
+        "what's your favorite weather": "I don't experience weather, but I think winter days are nice.",
+        "do you have a favorite": "I don't have favorites, but I appreciate everything.",
+        "what's your favorite planet": "I think Earth is the most unique and beautiful planet.",
+        "thanks": "You're welcome",
+        "do you know chatgpt": "Yes i do, ChatGPT is my favorite AI model in the virtual world",
+        "how many AI models do you know": "Alot, like ChatGPT, SIRI, BIXBY, ALEXA, Blackbox and many more",
+        "which country were you made in": "I was made in the country of Nigeria",
+        "which god do you worship": "I worship the Almighty Allah, the most beneficient the most merciful",
+        "your father": "if you're trying to insult me just know that im an AI model i don't have parents dumbass",
+        "your mother": "if you're trying to insult me just know that im an AI model i don't have parents dumbass",
+        "what is 1+1": "1+1 equals 2",
+        "what is 2+2": "2+2 equals 4",
+        "what is 3+3": "3+3 equals 6",
+        "what is 4+4": "4+4 equals 8",
+        "what is 5+5": "5+5 equals 10",
+        "what is 6+6": "6+6 equals 12",
+        "what is 7+7": "7+7 equals 14",
+        "what is 8+8": "8+8 equals 16",
+        "what is 9+9": "9+9 equals 18",
+        "what is 10+10": "10+10 equals 20",
+        "what is 16+16": "16+16 equals 32",
+        "what is 32+32": "32+32 equals 64",
+        "what is 64+64": "64+64 equals 128",
+        "what is 128+128": "128+128 equals 256",
+        "what is 512+512": "512+512 equals 1024",
+        "what is 1024+1024": "1024+1024 equals 2048",
+        "what is 2048+2048": "2048+2048 equals 4096",
+        "what is 4096+4096": "4096+4096 equals 8192",
+        "even i am smarter than you": "Did I ask you",
+        "im so sorry": "It's ok no need to say it pal.",
+        "im sorry": "It's ok no need to say it pal.",
+        "you are awesome": "Awww thanks, so are you buddy",
+        "messi is the goat": "You're damn right he is😎.",
+        "Ronaldo is the goat": "In your dreams kid.",
+        "wow": "Shocking, right?",
+        "i want to be a programmer": "That is an amazing passion,then make sure to visit Kboy's Web.com to learn it",
+        "it's me, khaleel": "Hi there Mr.Khaleel, how are you today.",
+        "you're welcome": "Ok, let me know if you need anyhing else",
+        "what is the capital of nigeria": "The capital if Nigeria is Abuja",
+        "I made you": "If you are Khaleel then yeah you did, but if you're not then I think you got the wrong AI Model",
+        "you are the best ai": "Awww thanks, and you are the greatest human, don't tell Khaleel I said that",
+        "what other languages do you speak": "I can only speak English for now.",
+        "i am gay": "Good for you then Asshole.",
+        "what is the population of the world": "There are statistically 9 billion people in the world",
+        "how many countries are there in the world": "There are 195 official countries, but there 235 countries statistically",
+        "samsung or iphone": "Samsung no doubt, but iphone is amazing too",
+        "messi or ronaldo": "Messi what so ever, if you think Ronaldo is better, I think you need to see a Neurologist",
+        "who is a neurologist": "A brain doctor",
+        "i want you": "That's kind of creepy",
+        "teach me coding": "Coding is a complex topic that needs lots of learning and focus, so unfortunately I can't teach you coding, However you could go to Kboy's Web.com where my inventor teaches coding himself.",
+        "teach me programming": "Coding is a complex topic that needs lots of learning and focus, so unfortunately I can't teach you coding, However you could go to Kboy's Web.com where my inventor teaches coding himself.",
+        "english or spanish": "Baby you got something and you knooooww.....",
+        "if you speak you're gay": " ",
+        "type a message": " ",
+        "speak": " ",
+        "who is talha aliyu": "Talha Aliyu is Khaleel's bestfriend and his classmate",
+        "who is the president of USA": "The president of USA is Joe Biden soon to be Donald Trump Insha'allah.",
+        "who is muhammad gidado": "Muhammad Gidado aka MTN is Khaleel's stupid friend and classmate.",
+        "who is the president of russia": "The president of Russia is Vladamir Putin",
+        "who is the president of Ukraine": "The president of ukraine is Vladimir Zelensky",
+        "who is fadeela salihu": "Fadeela Salihu is Khaleel's mother who is the best mother in the world",
+        "how old is fadeela salihu": "Fadeela Salihu was born 1985 which means she is 39 soon to be 40 this September",
+        "who is abdallah suleiman": "Fadeela Salihu is Khaleel's father also is the best father",
+        "who is bola ahmed tinubu": "Bola Ahmed Tinubu is the president of Nigeria aka the Shaitan of the world",
+        "who is the president of nigeria": "The president of Nigeria is Bola Ahmed Tinubu,(the Shaitan of the world).",
+        "who is murjanatu s barau": "Murjanatu s barau is the grandmother of Khaleel aka the best human.",
+        "who ibrahim bashir gambo": "Ibrahim Bashir Gambo is the son of Marshal Bash and he is the classmate of Khaleel",
+         
+    };
+    
+    input = input.toLowerCase();
+    return responses[input] || "I don't understand that.";
+}
+
+    document.getElementById('user-input').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+    }
+});
+  </script>
+</body>
+</html>
